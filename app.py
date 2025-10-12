@@ -36,27 +36,7 @@ if not api_key:
 
 # ==== Load PDF ====
 # folder penyimpanan dokumen
-
-@st.cache_resource
-def download_and_extract():
-    url = "https://drive.google.com/drive/folders/1Ur5bXiD3RcNJ-ssodSAZeoDWmmHMv62n?usp=sharing"
-    output = "docs.zip"
-    if not os.path.exists('docs'):
-        gdown.download(url, output, quiet=False)
-        with ZipFile(output, 'r') as zip_ref:
-            zip_ref.extractall('docs')
-        os.remove(output)
-        # setelah ekstrak Gabung menjadi satu file
-        merged_path = 'docs/merged.pdf'
-        with open(merged_path, 'wb') as merged_file:
-            for pdf_file in glob.glob('docs/*.pdf'):
-                if pdf_file != merged_path:
-                    with open(pdf_file, 'rb') as f:
-                        merged_file.write(f.read())
-        print(f"Merged PDFs into {merged_path}")
-    return 'docs'
-
-folder_path = download_and_extract()
+folder_path = 'dokumen'
 
 # list untuk menyimpan dokumen yang dibaca oleh PyPDFLoader
 all_docs = []
@@ -70,7 +50,6 @@ for pdf_path in glob.glob(f'{folder_path}/*.pdf'):
     all_docs.extend(docs)
 
 print(f"Loaded {len(all_docs)} documents from {folder_path} folder.")
-
 
 # ==== Split text ====
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -154,3 +133,4 @@ if st.button("Submit"):
                     
     else:
         st.error("Silakan upload file CSV terlebih dahulu.")
+
