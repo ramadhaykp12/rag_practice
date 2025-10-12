@@ -56,7 +56,7 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20
 chunks = text_splitter.split_documents(all_docs)
 
 # ==== Setup Embeddings & VectorStore ====
-model = "sentence-transformers/all-MiniLM-L6-v2"
+model = "sentence-transformers/all-mpnet-base-v2"
 embeddings = HuggingFaceEndpointEmbeddings(
     model=model,
     task="feature-extraction",
