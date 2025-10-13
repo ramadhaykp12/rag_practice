@@ -27,7 +27,7 @@ except RuntimeError:
 
 # ==== Load API Key ====
 load_dotenv()
-api_key = st.secrets['GOOGLE+API_KEY']
+api_key = st.secrets['GOOGLE_API_KEY']
 hf_key = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 
 if not api_key:
