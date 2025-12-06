@@ -61,7 +61,7 @@ def split_documents(_all_docs):
 @st.cache_resource(show_spinner=False)
 def get_embeddings(_hf_key=hf_key):
     # 🔥 Model embedding GRATIS & MULTILINGUAL
-    model = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+    model = "Alibaba-NLP/gte-base-en-v1.5"
 
     embeddings = HuggingFaceEndpointEmbeddings(
         model=model,
