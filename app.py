@@ -101,4 +101,92 @@ def get_llm(_api_key=api_key):
 # ===============================
 st.sidebar.header("📚 Building Knowledge Base")
 
-all_docs = load_document
+all_docs = load_documents(folder_path)
+if not all_docs:
+    st.sidebar.warning("Belum ada dokumen RAG di folder `dokumen/`.")
+
+chunks = split_documents(all_docs)
+embeddings = get_embeddings(hf_key)
+vector_store = get_vectorstore(chunks, embeddings)
+llm = get_llm(api_key)
+
+# ===============================
+# State Definition
+# ===============================
+class State(TypedDict):
+    question: str
+    context: list[Document]
+    answer: str
+
+
+# ===============================
+# Define Workflow
+# ===============================
+def retrieve(state: State):
+    """Ambil dokumen relevan dari RAG berdasarkan pertanyaan."""
+    retrieved_docs = vector_store.similarity_search(state["question"], k=3)
+    return {"context": retrieved_docs}
+
+
+def generate(state: State):
+    """Buat jawaban dari konteks dokumen."""
+    docs_content = "\n\n".join(doc.page_content for doc in state["context"])
+
+    full_prompt = f"""
+    Berdasarkan sumber pengetahuan RAG yang tersedia,
+    berikan analisis terhadap dokumen berikut dan jawab pertanyaan berikut.
+
+    === PDF Content ===
+    {docs_content[:4000]}
+
+    === Pertanyaan ===
+    {state['question']}
+
+    Berikan jawaban yang jelas dan ringkas.
+    """
+    response = llm.invoke(full_prompt)
+    answer = response.content if hasattr(response, "content") else str(response)
+    return {"answer": answer}
+
+
+# ===============================
+# Build LangGraph
+# ===============================
+graph_builder = StateGraph(State)
+graph_builder.add_node("retrieve", retrieve)
+graph_builder.add_node("generate", generate)
+graph_builder.add_edge(START, "retrieve")
+graph_builder.add_edge("retrieve", "generate")
+graph = graph_builder.compile()
+
+# ===============================
+# Streamlit UI
+# ===============================
+st.title("📘 RAG with LangChain & Gemini")
+st.write("Analisis dokumen PDF berdasarkan sumber data RAG yang sudah ada.")
+
+# Upload PDF file baru untuk dianalisis
+uploaded_file = st.file_uploader("📤 Upload file PDF baru untuk analisis", type=["pdf"])
+
+if uploaded_file:
+    pdf_path = os.path.join(uploaded_path, "uploaded.pdf")
+    with open(pdf_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    st.success("✅ File berhasil diunggah!")
+
+    loader = PyPDFLoader(pdf_path)
+    new_pdf_docs = loader.load()
+    pdf_text = "\n\n".join(doc.page_content for doc in new_pdf_docs)
+
+    if st.button("🚀 Analisis dengan RAG"):
+        prompt = (
+            "Berdasarkan pengetahuan anda, apakah seluruh isi dokumen berikut "
+            "telah tercakup dalam dokumen RAG? Jika ada bagian Perda yang belum tercantum, tuliskan daftarnya.\n\n"
+            f"{pdf_text[:4000]}"
+        )
+
+        with st.spinner("🔎 Memproses dokumen..."):
+            result = graph.invoke({"question": prompt})
+
+        st.subheader("💬 Hasil Analisis:")
+        st.write(result["answer"])
