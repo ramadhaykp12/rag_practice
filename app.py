@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph import START, StateGraph
@@ -61,7 +61,7 @@ def split_documents(_all_docs):
 @st.cache_resource(show_spinner=False)
 def get_embeddings(_hf_key=hf_key):
     # 🔥 Model embedding GRATIS & MULTILINGUAL
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+    embeddings = HuggingFaceEmbeddings(model_name="jinaai/jina-embeddings-v4")
     return embeddings
 
 
