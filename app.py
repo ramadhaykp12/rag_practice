@@ -61,7 +61,7 @@ def split_documents(_all_docs):
 @st.cache_resource(show_spinner=False)
 def get_embeddings(_hf_key=hf_key):
     # 🔥 Model embedding GRATIS & MULTILINGUAL
-    embeddings = HuggingFaceEmbeddings(model_name="jinaai/jina-embeddings-v4")
+    embeddings = HuggingFaceEndpointEmbeddings(model_name="jinaai/jina-embeddings-v4")
     return embeddings
 
 
