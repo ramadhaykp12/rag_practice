@@ -61,7 +61,7 @@ def split_documents(_all_docs):
 @st.cache_resource(show_spinner=False)
 def get_embeddings(_hf_key=hf_key):
     # 🔥 Model embedding GRATIS & MULTILINGUAL
-    embeddings = GoogleGenerativeAIEmbeddings(model_name="text-multilingual-embedding-002")
+    embeddings = GoogleGenerativeAIEmbeddings(model="text-multilingual-embedding-002")
     return embeddings
 
 
